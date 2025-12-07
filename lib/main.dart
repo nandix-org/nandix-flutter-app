@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'firebase_options.dart';
-import 'config/app_router.dart';
-import 'config/app_theme.dart';
+import 'screens/splash_screen.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const ProviderScope(child: NandixApp()));
+  runApp(const NandixApp());
 }
 
 class NandixApp extends StatelessWidget {
@@ -18,11 +11,19 @@ class NandixApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return MaterialApp(
       title: 'NANDIX',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      routerConfig: appRouter,
+      theme: ThemeData(
+        primaryColor: const Color(0xFF102E4A),
+        scaffoldBackgroundColor: const Color(0xFFF5F0E8),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF102E4A),
+          primary: const Color(0xFF102E4A),
+        ),
+        useMaterial3: true,
+      ),
+      home: const SplashScreen(),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../config/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'app_selector.dart';
+import 'webview_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,6 +12,9 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
+  static const Color navy = Color(0xFF102E4A);
+  static const Color pearl = Color(0xFFFFF7E6);
+
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -33,11 +37,58 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/login');
+    // Check for saved app preference and navigate
+    _checkSavedPreference();
+  }
+
+  Future<void> _checkSavedPreference() async {
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (!mounted) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final savedApp = prefs.getString('selected_app');
+
+    if (savedApp != null) {
+      // User has a saved preference, go directly to that app
+      String url;
+      String title;
+      
+      switch (savedApp) {
+        case 'store':
+          url = 'https://nandix.app';
+          title = 'NANDIX Store';
+          break;
+        case 'admin':
+          url = 'https://nandix-admin.web.app';
+          title = 'NANDIX Admin';
+          break;
+        case 'customer':
+          url = 'https://nandix-customer.web.app';
+          title = 'NANDIX Customer';
+          break;
+        default:
+          _navigateToSelector();
+          return;
       }
-    });
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WebViewScreen(url: url, title: title),
+        ),
+      );
+    } else {
+      // No saved preference, show app selector
+      _navigateToSelector();
+    }
+  }
+
+  void _navigateToSelector() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const AppSelector()),
+    );
   }
 
   @override
@@ -49,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.navy,
+      backgroundColor: navy,
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,
@@ -65,11 +116,11 @@ class _SplashScreenState extends State<SplashScreen>
                       width: 120,
                       height: 120,
                       decoration: BoxDecoration(
-                        color: AppTheme.pearl,
+                        color: pearl,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.pearl.withOpacity(0.3),
+                            color: pearl.withOpacity(0.3),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -79,10 +130,9 @@ class _SplashScreenState extends State<SplashScreen>
                         child: Text(
                           'Nx',
                           style: TextStyle(
-                            fontFamily: 'Playfair Display',
                             fontSize: 48,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.navy,
+                            color: navy,
                           ),
                         ),
                       ),
@@ -91,20 +141,18 @@ class _SplashScreenState extends State<SplashScreen>
                     const Text(
                       'NANDIX',
                       style: TextStyle(
-                        fontFamily: 'Playfair Display',
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.pearl,
+                        color: pearl,
                         letterSpacing: 8,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Smart Business OS',
+                      'Business Intelligence',
                       style: TextStyle(
-                        fontFamily: 'Inter',
                         fontSize: 14,
-                        color: AppTheme.pearl.withOpacity(0.7),
+                        color: pearl.withOpacity(0.7),
                         letterSpacing: 2,
                       ),
                     ),
@@ -115,7 +163,7 @@ class _SplashScreenState extends State<SplashScreen>
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          AppTheme.pearl.withOpacity(0.5),
+                          pearl.withOpacity(0.8),
                         ),
                       ),
                     ),
